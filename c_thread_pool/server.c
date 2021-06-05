@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "utils.h"
 
@@ -60,17 +61,29 @@ void serve_connection(int sockfd) {
   close(sockfd);
 }
 
+void serve_connection_threaded (int sockfd) {
+  unsigned long id = (unsigned long)pthread_self();
+  printf("Thread %lu , Socket %d\n", id, sockfd);
+  serve_connection(sockfd);
+}
+
 int main(int argc, char** argv) {
   setvbuf(stdout, NULL, _IONBF, 0);
   printf("RUNNING  %ld \n", (long)getpid());
 
+  char thread_option[100] = "FALSE";
   int portnum = 9090;
-  if (argc >= 2) {
-    portnum = atoi(argv[1]);
-  }
-  printf("Rheagal serving on port %d\n", portnum);
 
+  if (argc == 2) {
+    portnum = atoi(argv[1]);
+  } else if (argc == 3) {
+    strcpy(thread_option,argv[2]);
+  }
+
+  printf("Rheagal serving running on port %d\n", portnum);
   int sockfd = listen_inet_socket(portnum);
+
+
   while (1) {
     struct sockaddr_in peer_addr;
     socklen_t peer_addr_len = sizeof(peer_addr);
@@ -82,8 +95,18 @@ int main(int argc, char** argv) {
     }
 
     report_peer_connected(&peer_addr, peer_addr_len);
-    serve_connection(newsockfd);
-    printf("Peer done 👍\n");
+
+    if (!strcmp(thread_option ,"TRUE")) {
+      pthread_t client_thread;
+      
+      int err = pthread_create(&client_thread, NULL, serve_connection_threaded, newsockfd);
+      if (err != 0)
+        perror("ERROR: THREAD CREATION: ");
+      pthread_detach(client_thread);
+    } else {
+      serve_connection(newsockfd);
+    }
+    printf("Client satisfied 👍\n");
   }
 
   return 0;

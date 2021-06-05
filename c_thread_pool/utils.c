@@ -26,9 +26,9 @@ void report_peer_connected(const struct sockaddr_in* sa, socklen_t salen) {
   char portbuf[NI_MAXSERV];
   if (getnameinfo((struct sockaddr*)sa, salen, hostbuf, NI_MAXHOST, portbuf,   //address-to-name;
                   NI_MAXSERV, 0) == 0) {
-    printf("peer (%s, %s) connected\n", hostbuf, portbuf);
+    printf("Client (%s, %s) connected\n", hostbuf, portbuf);
   } else {
-    printf("peer (unknonwn) connected\n");
+    printf("Client (unknonwn) connected\n");
   }
 }
 
@@ -40,7 +40,7 @@ int listen_inet_socket(int portnum) {
 
   int opt = 1;
   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-    perror_die("setsockopt");
+    perror_die("SETSOCKOPT");
   }
 
   struct sockaddr_in serv_addr;
