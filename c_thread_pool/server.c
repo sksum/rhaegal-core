@@ -12,6 +12,7 @@
 #include <pthread.h>
 
 #include "utils.h"
+#include "thpool.h"
 
 typedef enum { WAIT_FOR_MSG, IN_MSG } ProcessingState;
 
@@ -73,16 +74,25 @@ int main(int argc, char** argv) {
 
   char thread_option[100] = "FALSE";
   int portnum = 9090;
+  int n_threads = 1;
 
   if (argc == 2) {
     portnum = atoi(argv[1]);
   } else if (argc == 3) {
     strcpy(thread_option,argv[2]);
+  } else if (argc == 4) {
+    strcpy(thread_option,argv[2]);
+    n_threads = atoi(argv[3]);
   }
 
-  printf("Rheagal serving running on port %d\n", portnum);
+  printf("Rheagal running on port %d\n", portnum);
   int sockfd = listen_inet_socket(portnum);
 
+
+/**
+ * Thread Pool Generation of ${n_threads} threads and user uses this pool for getting stuff
+ */
+	threadpool thpool = thpool_init(n_threads);
 
   while (1) {
     struct sockaddr_in peer_addr;
@@ -97,17 +107,15 @@ int main(int argc, char** argv) {
     report_peer_connected(&peer_addr, peer_addr_len);
 
     if (!strcmp(thread_option ,"TRUE")) {
-      pthread_t client_thread;
-      
-      int err = pthread_create(&client_thread, NULL, serve_connection_threaded, newsockfd);
-      if (err != 0)
-        perror("ERROR: THREAD CREATION: ");
-      pthread_detach(client_thread);
+      thpool_add_work(thpool,serve_connection_threaded , newsockfd);
+
     } else {
       serve_connection(newsockfd);
     }
     printf("Client satisfied 👍\n");
   }
-
+	thpool_wait(thpool);
+	puts("Killing threadpool");
+	thpool_destroy(thpool);
   return 0;
 }
