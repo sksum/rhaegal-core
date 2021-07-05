@@ -1,8 +1,11 @@
-# server-c
-
-This is an implementation of a simple C server from scratch, using https://eli.thegreenplace.net/2017/concurrent-servers-part-1-introduction/ as a template.
+# Rhaegal
+This is a concurrent, lightweight, multi-threaded webserver made in C using inspiration from https://eli.thegreenplace.net/2017/concurrent-servers-part-1-introduction/ and https://github.com/davidmoreno/onion 
 This repo is divided based on different parts of the blog :
-- sequential servers
-- threaded both one_thread_per_client and using a thread_pool
-- event driven 
-- libuv
+- Tutorial
+    - Sequential
+    - Threaded
+    - Event driven 
+- Rhaegal 
+    - demo
+        - api,models,src
+    - server.c 
