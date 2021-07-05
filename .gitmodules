@@ -1,0 +1,3 @@
+[submodule "rhaegal/libuv"]
+	path = rhaegal/libuv
+	url = https://github.com/libuv/libuv.git
