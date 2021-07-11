@@ -1,7 +1,3 @@
-// Utility functions for socket servers in C.
-//
-// Inspired By Eli Bendersky [http://eli.thegreenplace.net]
-// This code is in the public domain.
 #include "utils.h"
 
 #include <fcntl.h>
@@ -26,14 +22,15 @@ void report_peer_connected(const struct sockaddr_in *sa, socklen_t salen)
 {
     char hostbuf[NI_MAXHOST];
     char portbuf[NI_MAXSERV];
-    if (getnameinfo((struct sockaddr *)sa, salen, hostbuf, NI_MAXHOST, portbuf, //address-to-name;
-                    NI_MAXSERV, 0) == 0)
+    // special function to get name and infor of client :
+    int status = getnameinfo((struct sockaddr *)sa, salen, hostbuf, NI_MAXHOST, portbuf, NI_MAXSERV, 0);
+    if (status == 0)
     {
-        printf("Client (%s, %s) connected\n", hostbuf, portbuf);
+        printf("Client: %s:%s\n", hostbuf, portbuf);
     }
     else
     {
-        printf("Client (unknonwn) connected\n");
+        printf("External-Unknown-Client tried to connect\n");
     }
 }
 
@@ -69,6 +66,7 @@ int listen_inet_socket(int portnum)
 
     return sockfd;
 }
+
 void die(char *fmt, ...)
 {
     va_list args;
